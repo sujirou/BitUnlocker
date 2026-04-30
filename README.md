@@ -18,7 +18,11 @@ This work builds entirely on the research by **Microsoft STORM** (Microsoft Secu
 
 ## Step-by-step
 
-### 1. Prepare the modified BCD
+### 1. Download boot_patched.sdi from Releases (or build your own SDI file, see below)
+
+Put it in the `TFTP-root\sdi\` folder 
+
+### 2. Prepare the modified BCD
 
 On the target device, open a WinRE command prompt (hold **Shift** while clicking **Restart**, then **Troubleshoot > Command Prompt** - click "Ignore this disk" when prompted for a Bitlocker recovery key and click "relaunch" if you're also told that the cmd prompt cannot run on a locked device - and if the cmd prompt just won't open, use your own WinPE if you can). Plug in a USB stick and run:
 
@@ -39,7 +43,7 @@ move BCD_modded BCD
 
 Move the resulting `BCD` file into `TFTP-root/Boot/` on the Linux machine.
 
-### 2. Set up the PXE server
+### 3. Set up the PXE server
 
 ```bash
 cd BitUnlocker
@@ -58,15 +62,15 @@ sudo dnsmasq --no-daemon \
   --port=0
 ```
 
-### 3. Trigger PXE boot
+### 4. Trigger PXE boot
 
 From WinRE select **Use a device > IPv4 Network** (or EFI network, or similar), or press the manufacturer's PXE boot key at power-on (F12 on HP, F9 on some Dell, etc.).
 
-### 4. Wait for the SDI transfer
+### 5. Wait for the SDI transfer
 
 The target will obtain an IP, download `bootmgfw.efi`, `Boot/BCD`, then `sdi/boot_patched.sdi`. The SDI file is large (~550 MB) so the transfer takes **several minutes**. A recovery-related message with the SDI path should appear on the target screen while it downloads (or any other kind of screen depending on the manufacturer).
 
-### 5. Profit
+### 6. Profit
 
 Once the transfer completes, a command prompt should appear with the OS volume decrypted and mounted (typically `C:` or `E:`).
 
