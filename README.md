@@ -81,7 +81,7 @@ Once the transfer completes, a command prompt should appear with the OS volume d
 | BitLocker configured with a **PIN** you know | Blue screen at PXE boot — type the PIN blindly and press Enter. Shouldn't work but it did for me once so try your luck |
 | Blue screen, no PIN | Target has likely migrated to CA 2023 — press Escape and let the SDI transfer finish anyway, but the Bitlocker-encrypted drive will most likely be locked at the end |
 | USB-C / Thunderbolt only | Use a USB-Ethernet adapter |
-| TFTP file not found | File names are case-sensitive — rename `bootmgfw.efi` to match what the target requests |
+| TFTP file not found (other than garbage Font files which we don't care about) | File names are case-sensitive — rename `bootmgfw.efi` to match what the target requests |
 
 ---
 
