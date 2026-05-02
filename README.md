@@ -132,7 +132,7 @@ The `boot_patched.sdi` file provided in Releases contains a modified WinRE.wim w
 ## Unexploitable cases
 
 - **TPM + PIN or TPM + key file** is configured and the attacker doesn't know it (to be confirmed if TPM+PIN is never exploitable even if the attacker knows the PIN)
-- **The boot manager has been migrated to CA 2023** — machines freshly installed since early 2026 likely ship with a CA 2023-signed `bootmgfw.efi` by default. To check, mount the EFI partition and inspect the active binary: `mountvol S: /s` then `sigcheck -i S:\EFI\Microsoft\Boot\bootmgfw.efi`. Note that `C:\Windows\Boot\EFI\bootmgfw.efi` may differ from the file actually used at boot — always check the EFI partition copy.
+- **KB5025885 is installed / the boot manager has been migrated to CA 2023** — machines freshly installed since early 2026 likely ship with a CA 2023-signed `bootmgfw.efi` by default. To check, mount the EFI partition and inspect the active binary: `mountvol S: /s` then `sigcheck -i S:\EFI\Microsoft\Boot\bootmgfw.efi`. Note that `C:\Windows\Boot\EFI\bootmgfw.efi` may differ from the file actually used at boot — always check the EFI partition copy.
 - **Non-default PCR policy** — configurations involving PCR 0, 2, or 4 will detect the change in boot path
 - **PCA 2011 revoked via DBX** — if the old certificate has been explicitly distrusted
 
