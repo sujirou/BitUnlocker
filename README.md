@@ -68,7 +68,7 @@ From WinRE select **Use a device > IPv4 Network** (or EFI network, or similar), 
 
 ### 5. Wait for the SDI transfer
 
-The target will obtain an IP, download `bootmgfw.efi`, `Boot/BCD`, then `sdi/boot_patched.sdi`. The SDI file is large (~550 MB) so the transfer takes **several minutes**. A recovery-related message with the SDI path should appear on the target screen while it downloads (or any other kind of screen depending on the manufacturer).
+The target will obtain an IP, download `bootmgfw.efi`, `Boot/BCD`, then `sdi/boot_patched.sdi`. The SDI file is large (~300 MB) so the transfer takes **several minutes**. A recovery-related message with the SDI path should appear on the target screen while it downloads (or any other kind of screen depending on the manufacturer).
 
 ### 6. Profit
 
