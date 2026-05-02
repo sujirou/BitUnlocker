@@ -1,8 +1,8 @@
 # BitUnlocker Downgrade Attack
 
-A proof of concept for accessing Bitlocker-encrypted disks on fully patched Windows 11 machines through a boot manager downgrade attack, leveraging the SDI vulnerability originally documented as **CVE-2025-48804**. The July 2025 patch fixes this in `bootmgfw.efi`, so any pre-patch `bootmgfw.efi` signed under PCA 2011 can be used for a downgrade attack, provided the target system trusts this PCA.
+A proof of concept for accessing BitLocker-encrypted disks on fully patched Windows 11 machines through a boot manager downgrade attack, leveraging the SDI vulnerability originally documented as **CVE-2025-48804**. The July 2025 patch fixes this in `bootmgfw.efi`, so any pre-patch `bootmgfw.efi` signed under PCA 2011 can be used for a downgrade attack, provided the target system trusts this PCA.
 
-Unlike Bitpixie, this exploit does not fundamentally rely on PXE — the vulnerability is in the boot manager itself, not in the PXE stack. PXE is simply the most practical delivery method for the old boot manager and the patched SDI. Other approaches are possible, such as directly replacing `bootmgfw.efi` on the EFI partition from a WinRE shell, as long as the replacement is signed with the same certificate currently trusted by the target's Secure Boot policy, changing a few things directly in the target BCD and finding a way to store the custom SDI file somewhere convenient.
+This PoC provides two delivery methods: **USB boot** (simpler and recommended) and **PXE boot**. Other approaches relying only on local partitions would probably be possible as well with a smaller SDI file, as long as the replacement is signed with the same certificate currently trusted by the target's Secure Boot policy.
 
 This work builds entirely on the research by **Microsoft STORM** (Microsoft Security Blog):
 > [BitUnlocker: Leveraging Windows Recovery to Extract BitLocker Secrets](https://techcommunity.microsoft.com/blog/microsoft-security-blog/bitunlocker-leveraging-windows-recovery-to-extract-bitlocker-secrets/4442806)
@@ -11,20 +11,19 @@ This work builds entirely on the research by **Microsoft STORM** (Microsoft Secu
 
 ## Prerequisites
 
-- Physical access to a BitLocker-encrypted device (TPM-only, PCR 7 + 11) 
+- Physical access to a BitLocker-encrypted device (TPM-only, PCR 7 + 11)
 - The device's Secure Boot database still trusts the **Microsoft Windows PCA 2011** certificate
-- PXE boot available, or another delivery method for the patched boot manager if you want to dig into it
-- A Linux machine with `dnsmasq`, an Ethernet cable, and a USB stick
+- A USB stick (recommended) **or** a Linux machine with `dnsmasq` and an Ethernet cable for PXE
 
 ## Step-by-step
 
 ### 1. Download boot_patched.sdi from Releases (or build your own SDI file, see below)
 
-Put it in the `TFTP-root\sdi\` folder 
+Put it in `USB/sdi/` (for USB method) or `TFTP-root/sdi/` (for PXE method).
 
 ### 2. Prepare the modified BCD
 
-On the target device, open a WinRE command prompt (hold **Shift** while clicking **Restart**, then **Troubleshoot > Command Prompt** - click "Ignore this disk" when prompted for a Bitlocker recovery key and click "relaunch" if you're also told that the cmd prompt cannot run on a locked device - and if the cmd prompt just won't open, use your own WinPE if you can). Plug in a USB stick and run:
+On the target device, open a WinRE command prompt (hold **Shift** while clicking **Restart**, then **Troubleshoot > Command Prompt** — click "Ignore this disk" when prompted for a BitLocker recovery key and click "relaunch" if you're also told that the cmd prompt cannot run on a locked device — and if the cmd prompt just won't open, use your own WinPE if you can). Plug in a USB stick and run:
 
 ```bat
 E: (or wherever your USB is)
@@ -41,9 +40,33 @@ bcdedit /store BCD_modded /set {GUID} ramdisksdipath \sdi\boot_patched.sdi
 move BCD_modded BCD
 ```
 
-Move the resulting `BCD` file into `TFTP-root/Boot/` on the Linux machine.
+Place the resulting `BCD` file in the appropriate location depending on your method:
+- **USB:** `USB/EFI/Microsoft/Boot/BCD`
+- **PXE:** `TFTP-root/Boot/BCD`
 
-### 3. Set up the PXE server
+### 3. Boot the target
+
+#### Option A: USB boot (recommended)
+
+Format a USB stick as **FAT32** and copy the contents of the `USB/` directory to its root. The USB stick should look like this:
+
+```
+USB stick root/
+├── EFI/
+│   ├── Boot/
+│   │   └── bootx64.efi        # Pre-patch boot manager (PCA 2011)
+│   └── Microsoft/
+│       └── Boot/
+│           └── BCD             # Your modified BCD
+└── sdi/
+    └── boot_patched.sdi        # Patched SDI with custom WinRE
+```
+
+Plug the USB stick into the target and trigger a UEFI USB boot — either from WinRE (**Use a device**) or by pressing the manufacturer's boot menu key at power-on (F12, F9, etc.). If the USB stick doesn't appear in the list of boot options, look for a **"Boot from file"** option in the UEFI boot menu, then navigate to `EFI/Boot/bootx64.efi` on the USB stick.
+
+#### Option B: PXE boot
+
+Connect the target to your Linux machine via Ethernet and start the PXE server:
 
 ```bash
 cd BitUnlocker
@@ -62,15 +85,13 @@ sudo dnsmasq --no-daemon \
   --port=0
 ```
 
-### 4. Trigger PXE boot
+Trigger PXE boot on the target — from WinRE select **Use a device > IPv4 Network**, or press the manufacturer's PXE boot key.
 
-From WinRE select **Use a device > IPv4 Network** (or EFI network, or similar), or press the manufacturer's PXE boot key at power-on (F12 on HP, F9 on some Dell, etc.).
+### 4. Wait for the SDI transfer
 
-### 5. Wait for the SDI transfer
+The boot manager will load the BCD, then start downloading `boot_patched.sdi`. The SDI file is large (~300 MB) so this takes a moment from USB, or **several minutes** over TFTP. A recovery-related message with the SDI path should appear on the target screen while it loads.
 
-The target will obtain an IP, download `bootmgfw.efi`, `Boot/BCD`, then `sdi/boot_patched.sdi`. The SDI file is large (~300 MB) so the transfer takes **several minutes**. A recovery-related message with the SDI path should appear on the target screen while it downloads (or any other kind of screen depending on the manufacturer).
-
-### 6. Profit
+### 5. Profit
 
 Once the transfer completes, a command prompt should appear with the OS volume decrypted and mounted (typically `C:` or `E:`).
 
@@ -78,17 +99,20 @@ Once the transfer completes, a command prompt should appear with the OS volume d
 
 | Situation | What happens |
 |---|---|
-| BitLocker configured with a **PIN** you know | Blue screen at PXE boot — type the PIN blindly and press Enter. Shouldn't work but it did for me once so try your luck |
-| Blue screen, no PIN | Target has likely migrated to CA 2023 — press Escape and let the SDI transfer finish anyway, but the Bitlocker-encrypted drive will most likely be locked at the end |
-| USB-C / Thunderbolt only | Use a USB-Ethernet adapter |
+| BitLocker configured with a **PIN** you know | Blue screen at boot — type the PIN blindly and press Enter. Shouldn't work but it did for me once so try your luck |
+| Blue screen, no PIN | Target has likely migrated to CA 2023 — press Escape and let the SDI transfer finish anyway, but the BitLocker-encrypted drive will most likely be locked at the end |
+| USB-C / Thunderbolt only | Use a USB-C drive or USB-Ethernet adapter (for PXE) |
 | TFTP file not found (other than garbage Font files which we don't care about) | File names are case-sensitive — rename `bootmgfw.efi` to match what the target requests |
 
 ---
 
 ## Build your own SDI file
 
-I've included two scripts in this repo, one enables you to build a modified SDI file from a boot.sdi and a WinRE.wim file, and the other one can be used to parse an SDI file to validate its structure and content. 
-The boot_patched.sdi file that I've provided contains a modified WinRE.wim file where the launch app is cmd.exe.
+I've included two scripts in `scripts/`:
+- `patch_sdi.py` — builds a modified SDI file from a `boot.sdi` and a `WinRE.wim` file
+- `parse_sdi.py` — parses an SDI file to validate its structure and content
+
+The `boot_patched.sdi` file provided in Releases contains a modified WinRE.wim where the launch app is `cmd.exe`.
 
 ## Unexploitable cases
 
