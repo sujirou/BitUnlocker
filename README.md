@@ -2,7 +2,7 @@
 
 A proof of concept for accessing BitLocker-encrypted disks on fully patched Windows 11 machines through a boot manager downgrade attack, leveraging the SDI vulnerability originally documented as **CVE-2025-48804**. The July 2025 patch fixes this in `bootmgfw.efi`, so any pre-patch `bootmgfw.efi` signed under PCA 2011 can be used for a downgrade attack, provided the target system trusts this PCA.
 
-This PoC provides two delivery methods: **USB boot** (simpler and recommended) and **PXE boot**. Other approaches relying only on local partitions would probably be possible as well with a smaller SDI file, as long as the replacement is signed with the same certificate currently trusted by the target's Secure Boot policy.
+This PoC provides two delivery methods: **USB boot** (simpler and recommended) and **PXE boot**. Other approaches relying only on local partitions would probably be possible as well with a smaller SDI file.
 
 This work builds entirely on the research by **Microsoft STORM** (Microsoft Security Blog):
 > [BitUnlocker: Leveraging Windows Recovery to Extract BitLocker Secrets](https://techcommunity.microsoft.com/blog/microsoft-security-blog/bitunlocker-leveraging-windows-recovery-to-extract-bitlocker-secrets/4442806)
