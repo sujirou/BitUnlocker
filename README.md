@@ -108,7 +108,7 @@ The boot manager will load the BCD, then start downloading `boot_patched.sdi`. T
 
 ### 5. Profit
 
-Once the transfer completes, a command prompt should appear with the OS volume decrypted and mounted (typically `C:` or `E:`).
+Once the transfer completes, a command prompt should appear with the OS volume decrypted and mounted (typically `C:` or `E:`). If it wasn't mounted automatically or you don't want to guess the letter, just run `diskpart` -> `sel vol X` (the one that looks like your encrypted drive) -> `assign letter=C` (or something else) -> `exit` -> profit
 
 ### Edge cases
 
