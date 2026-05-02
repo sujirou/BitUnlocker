@@ -66,6 +66,21 @@ Plug the USB stick into the target and trigger a UEFI USB boot — either from W
 
 #### Option B: PXE boot
 
+The `TFTP-root/` directory is structured as follows:
+
+```
+TFTP-root/
+├── bootmgfw.efi                # Pre-patch boot manager (PCA 2011)
+├── Boot/
+│   └── BCD                     # Your modified BCD
+├── EFI/
+│   └── Microsoft/
+│       └── Boot/
+│           └── bootmgfw.efi    # Same pre-patch boot manager
+└── sdi/
+    └── boot_patched.sdi        # Patched SDI with custom WinRE
+```
+
 Connect the target to your Linux machine via Ethernet and start the PXE server:
 
 ```bash
