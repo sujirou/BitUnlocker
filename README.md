@@ -75,7 +75,7 @@ The target will obtain an IP, download `bootmgfw.efi`, `Boot/BCD`, then `sdi/boo
 
 ### 6. Profit
 
-Once the transfer completes, a command prompt should appear with the OS volume decrypted and mounted (typically `C:` or `E:`).
+Once the transfer completes, a command prompt should appear with the OS volume decrypted and mounted (typically `C:` or `E:`). If it wasn't mounted automatically or you don't want to guess the letter, just run `diskpart` -> `sel vol X` (the one that looks like your encrypted drive) -> `assign letter=C` (or something else) -> `exit` -> profit
 
 ### Edge cases
 
@@ -95,10 +95,10 @@ The boot_patched.sdi file that I've provided contains a modified WinRE.wim file 
 
 ## Unexploitable cases
 
-* **TPM + PIN or TPM + key file** is configured and the attacker doesn't know it (to be confirmed if TPM+PIN is never exploitable even if the attacker knows the PIN)
-* **The boot manager has been migrated to CA 2023** — machines freshly installed since early 2026 likely ship with a CA 2023-signed `bootmgfw.efi` by default. To check, mount the EFI partition and inspect the active binary: `mountvol S: /s` then `sigcheck -i S:\EFI\Microsoft\Boot\bootmgfw.efi`. Note that `C:\Windows\Boot\EFI\bootmgfw.efi` may differ from the file actually used at boot — always check the EFI partition copy.
-* **Non-default PCR policy** — configurations involving PCR 0, 2, or 4 will detect the change in boot path
-* **PCA 2011 revoked via DBX** — if the old certificate has been explicitly distrusted
+- **TPM + PIN or TPM + key file** is configured and the attacker doesn't know it (to be confirmed if TPM+PIN is never exploitable even if the attacker knows the PIN)
+- **KB5025885 is installed / the boot manager has been migrated to CA 2023** — machines freshly installed since early 2026 likely ship with a CA 2023-signed `bootmgfw.efi` by default. To check, mount the EFI partition and inspect the active binary: `mountvol S: /s` then `sigcheck -i S:\EFI\Microsoft\Boot\bootmgfw.efi`. Note that `C:\Windows\Boot\EFI\bootmgfw.efi` may differ from the file actually used at boot — always check the EFI partition copy.
+- **Non-default PCR policy** — configurations involving PCR 0, 2, or 4 will detect the change in boot path
+- **PCA 2011 revoked via DBX** — if the old certificate has been explicitly distrusted
 
 ---
 
