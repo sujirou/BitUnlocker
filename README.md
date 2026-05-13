@@ -143,7 +143,7 @@ The `boot_patched.sdi` file provided in Releases contains a modified WinRE.wim w
 ## Mitigations
 
 - **Enable TPM + PIN** — a pre-boot PIN prevents the TPM from unsealing the VMK without user interaction, regardless of boot path manipulation
-- **Migrate to Windows UEFI CA 2023** — once the boot manager is signed with the new certificate and PCA 2011 is revoked, downgrade attacks become impossible. See [KB5025885](https://support.microsoft.com/en-us/topic/kb5025885-how-to-manage-the-windows-boot-manager-revocations-for-secure-boot-changes-associated-with-cve-2023-24932-41a975df-beb2-40c1-99a3-b3ff139f832d) for the migration procedure.
+- **Migrate to Windows UEFI CA 2023 and apply [KB5025885](https://support.microsoft.com/en-us/topic/kb5025885-how-to-manage-the-windows-boot-manager-revocations-for-secure-boot-changes-associated-with-cve-2023-24932-41a975df-beb2-40c1-99a3-b3ff139f832d) to prevent downgrade attacks altogether**
 
 ---
 
