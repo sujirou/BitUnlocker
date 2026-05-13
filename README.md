@@ -6,7 +6,7 @@ A proof of concept for accessing BitLocker-encrypted disks **in under 5 minutes*
 
 This PoC provides two delivery methods: **USB boot** (simpler and recommended) and **PXE boot**. Other approaches relying only on local partitions would probably be possible as well with a smaller SDI file.
 
-This work builds entirely on the research by **Microsoft STORM** (Microsoft Security Blog):
+This work builds entirely on the research by **Microsoft STORM** (Netanel Ben Simon and Alon Leviev):
 > [BitUnlocker: Leveraging Windows Recovery to Extract BitLocker Secrets](https://techcommunity.microsoft.com/blog/microsoft-security-blog/bitunlocker-leveraging-windows-recovery-to-extract-bitlocker-secrets/4442806)
 
 ---
@@ -149,7 +149,7 @@ The `boot_patched.sdi` file provided in Releases contains a modified WinRE.wim w
 
 ## Credits
 
-**Microsoft STORM** for the original BitUnlocker research and vulnerability disclosure.
+**Microsoft STORM (Netanel Ben Simon and Alon Leviev)** for the original BitUnlocker research and vulnerability disclosure.
 
 ---
 
