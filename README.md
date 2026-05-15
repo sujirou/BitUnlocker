@@ -116,7 +116,7 @@ Once the transfer completes, a command prompt should appear with the OS volume d
 
 | Situation | What happens |
 |---|---|
-| BitLocker configured with a **PIN** you know | Blue screen at boot — type the PIN blindly and press Enter. Shouldn't work but it did for me once so try your luck |
+| BitLocker configured with a **PIN** you know | Blue screen at boot — type the PIN blindly and press Enter |
 | Blue screen, no PIN | Target has likely migrated to CA 2023 — press Escape and let the SDI transfer finish anyway, but the BitLocker-encrypted drive will most likely be locked at the end |
 | USB-C / Thunderbolt only | Use a USB-C drive or USB-Ethernet adapter (for PXE) |
 | TFTP file not found (other than garbage Font files which we don't care about) | File names are case-sensitive — rename `bootmgfw.efi` to match what the target requests |
@@ -133,7 +133,7 @@ The `boot_patched.sdi` file provided in Releases contains a modified WinRE.wim w
 
 ## Unexploitable cases
 
-- **TPM + PIN or TPM + key file** is configured and the attacker doesn't know it (to be confirmed if TPM+PIN is never exploitable even if the attacker knows the PIN)
+- **TPM + PIN or TPM + key file** is configured and the attacker doesn't know it
 - **KB5025885 is installed / the boot manager has been migrated to CA 2023** — machines freshly installed since early 2026 likely ship with a CA 2023-signed `bootmgfw.efi` by default. To check, mount the EFI partition and inspect the active binary: `mountvol S: /s` then `sigcheck -i S:\EFI\Microsoft\Boot\bootmgfw.efi`. Note that `C:\Windows\Boot\EFI\bootmgfw.efi` may differ from the file actually used at boot — always check the EFI partition copy.
 - **Non-default PCR policy** — configurations involving PCR 0, 2, or 4 will detect the change in boot path
 - **PCA 2011 revoked via DBX** — if the old certificate has been explicitly distrusted
@@ -142,7 +142,7 @@ The `boot_patched.sdi` file provided in Releases contains a modified WinRE.wim w
 
 ## Mitigations
 
-- **Enable TPM + PIN** — a pre-boot PIN prevents the TPM from unsealing the VMK without user interaction, regardless of boot path manipulation
+- **Enable TPM + PIN** — a pre-boot PIN prevents the TPM from unsealing the VMK without user interaction, regardless of boot path manipulation. Keep in mind however that it wouldn't stop an insider who has knowledge of the PIN.
 - **Migrate to Windows UEFI CA 2023 and apply [KB5025885](https://support.microsoft.com/en-us/topic/kb5025885-how-to-manage-the-windows-boot-manager-revocations-for-secure-boot-changes-associated-with-cve-2023-24932-41a975df-beb2-40c1-99a3-b3ff139f832d) to prevent downgrade attacks altogether**
 
 ---
